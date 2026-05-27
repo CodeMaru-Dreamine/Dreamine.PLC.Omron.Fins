@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 using Dreamine.PLC.Abstractions.Results;
 
-=======
->>>>>>> main
 namespace Dreamine.PLC.Omron.Fins.Transport;
 
 /// <summary>
@@ -13,20 +10,12 @@ public sealed class FakeOmronFinsTransport : IOmronFinsTransport
     private readonly Queue<byte[]> _responses = new();
 
     /// <inheritdoc />
-<<<<<<< HEAD
     public bool IsConnected { get; private set; }
-=======
-    public bool IsReady { get; private set; }
->>>>>>> main
 
     /// <summary>
     /// Gets the sent request frames.
     /// </summary>
-<<<<<<< HEAD
     public List<byte[]> SentRequests { get; } = [];
-=======
-    public List<byte[]> SentRequests { get; } = new();
->>>>>>> main
 
     /// <summary>
     /// Adds a response frame to be returned by the next request.
@@ -38,7 +27,6 @@ public sealed class FakeOmronFinsTransport : IOmronFinsTransport
     }
 
     /// <inheritdoc />
-<<<<<<< HEAD
     public Task<PlcResult> ConnectAsync(CancellationToken cancellationToken = default)
     {
         IsConnected = true;
@@ -66,41 +54,12 @@ public sealed class FakeOmronFinsTransport : IOmronFinsTransport
         }
 
         return Task.FromResult(PlcResult<byte[]>.Success(_responses.Dequeue()));
-=======
-    public Task OpenAsync(CancellationToken cancellationToken)
-    {
-        IsReady = true;
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public Task CloseAsync(CancellationToken cancellationToken)
-    {
-        IsReady = false;
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public Task<byte[]> SendAndReceiveAsync(byte[] request, CancellationToken cancellationToken)
-    {
-        SentRequests.Add(request.ToArray());
-        if (_responses.Count == 0)
-        {
-            throw new InvalidOperationException("No fake FINS response has been queued.");
-        }
-
-        return Task.FromResult(_responses.Dequeue());
->>>>>>> main
     }
 
     /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
-<<<<<<< HEAD
         IsConnected = false;
-=======
-        IsReady = false;
->>>>>>> main
         return ValueTask.CompletedTask;
     }
 }

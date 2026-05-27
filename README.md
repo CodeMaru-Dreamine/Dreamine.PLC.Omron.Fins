@@ -1,131 +1,137 @@
 # Dreamine.PLC.Omron.Fins
 
-Omron FINS protocol adapter for the Dreamine PLC communication stack.
+Omron FINS TCP/UDP PLC adapter for the Dreamine PLC package family.
 
-## Purpose
-
-`Dreamine.PLC.Omron.Fins` is part of the Dreamine PLC package family.
-
-This package provides the adapter boundary for Omron FINS communication without depending on OMRON CX-Compolet or SYSMAC Gateway runtime files.
-
-The package keeps PLC communication responsibilities separated:
-
-- `Dreamine.PLC.Abstractions` defines vendor-neutral PLC contracts.
-- `Dreamine.PLC.Core` provides shared client lifecycle and validation infrastructure.
-- `Dreamine.PLC.Omron.Fins` implements the Omron FINS adapter boundary.
-- `Dreamine.PLC.Wpf` can consume this package through `IPlcClient`.
+This package provides FINS TCP/UDP client support and built-in FINS simulator servers for local and PC-to-PC validation.
 
 ## Features
 
-- Omron FINS adapter project structure
-- FINS/UDP transport boundary
-- FINS/TCP transport boundary
-- Memory Area Read command boundary (`0101`)
-- Memory Area Write command boundary (`0102`)
-- DM/CIO/WR/HR area mapping boundary
-- Dreamine `IPlcClient` integration
-- Testable transport abstraction through `IOmronFinsTransport`
+- Omron FINS TCP client
+- Omron FINS UDP client
+- FINS TCP simulator server
+- FINS UDP simulator server
+- Memory area read/write support boundary
+- Word read/write diagnostics
+- Repeated handshake validation flow
+- Timeout and retry support for UDP
+- Integration with `IPlcClient`
 
-## Current Scope
+## Supported simulator test modes
 
-This repository is prepared as the Omron FINS implementation boundary.
-
-The first stable target should be:
-
-- FINS/UDP Memory Area Read
-- FINS/UDP Memory Area Write
-- FINS/TCP connection negotiation
-- FINS/TCP Memory Area Read
-- FINS/TCP Memory Area Write
-- Local simulator server for 1PC and 2PC tests
-
-## Vendor Runtime Notice
-
-This package does not include OMRON CX-Compolet or SYSMAC Gateway runtime files.
-
-Users must install and license vendor runtime software separately when using vendor-runtime-based adapters.
-
-`Dreamine.PLC.Omron.Fins` is intended to communicate through the FINS protocol and does not redistribute OMRON DLLs.
-
-OMRON, CX-Compolet, and SYSMAC Gateway are trademarks or products of their respective owners.
-
-## Basic Usage
-
-```csharp
-using Dreamine.PLC.Abstractions.Devices;
-using Dreamine.PLC.Omron.Fins.Clients;
-using Dreamine.PLC.Omron.Fins.Options;
-
-var client = new OmronFinsPlcClient(new OmronFinsConnectionOptions
-{
-    Host = "192.168.0.10",
-    Port = 9600,
-    TransportType = OmronFinsTransportType.Udp,
-    SourceNode = 10,
-    DestinationNode = 1,
-    TimeoutMs = 3000,
-    RetryCount = 3
-});
-
-await client.ConnectAsync();
-
-var result = await client.ReadWordsAsync(
-    new PlcAddress(PlcDeviceType.D, 100),
-    count: 4);
-```
-
-## Device Mapping Policy
-
-The initial mapping is intentionally conservative.
-
-| Dreamine Device | FINS Meaning | Word Area | Bit Area |
-|---|---|---:|---:|
-| `D` | Data Memory | `DM Word` | `DM Bit` |
-| `M` | Internal/CIO-compatible relay boundary | `CIO Word` | `CIO Bit` |
-| `W` | Work area | `WR Word` | `WR Bit` |
-| `R` | Holding area boundary | `HR Word` | `HR Bit` |
-
-Unsupported device types must fail explicitly instead of being guessed.
-
-## Project References
-
-- `Dreamine.PLC.Abstractions`
-- `Dreamine.PLC.Core`
-
-## Target Framework
-
-```xml
-<TargetFramework>net8.0</TargetFramework>
-```
-
-## Package Metadata
-
-| Item | Value |
-|---|---|
-| PackageId | `Dreamine.PLC.Omron.Fins` |
-| Version | `1.0.0` |
-| License | `MIT` |
-| Repository | `https://github.com/CodeMaru-Dreamine/Dreamine.PLC.Omron.Fins` |
-| Project URL | `https://github.com/CodeMaru-Dreamine/Dreamine.PLC.FullKit` |
-
-## Architecture Rule
-
-This repository must not reference application-level projects.
-
-Dependency direction must remain one-way:
+The SampleSmart PLC Protocol page supports:
 
 ```text
-Abstractions
-    ▲
-    │
-Core
-    ▲
-    │
-Vendor Adapter
+FinsTcp ↔ FinsTcp
+FinsUdp ↔ FinsUdp
 ```
 
-`Dreamine.PLC.Omron.Fins` must not reference `Dreamine.PLC.Wpf`, samples, or application projects.
+The server and client modes must match. A `SimulatorTcp`, `McTcp`, or `McUdp` server cannot be used with a `FinsTcp` or `FinsUdp` client.
+
+## 1PC test
+
+Use this flow for local validation.
+
+```text
+Mode: FinsTcp or FinsUdp
+Host: 127.0.0.1
+Port: 55000
+Start Server
+Use Client
+Connect
+Write Words
+Read Words
+Run Handshake
+```
+
+## 2PC test
+
+Server PC:
+
+```text
+Mode: FinsTcp or FinsUdp
+Host: 0.0.0.0
+Port: 55000
+Start Server
+```
+
+Client PC:
+
+```text
+Mode: same as server
+Host: server PC IP
+Port: 55000
+Use Client
+Connect
+Read/Write or Handshake
+```
+
+## Firewall requirement for PC-to-PC tests
+
+Open the inbound port on the server PC.
+
+For TCP:
+
+```powershell
+New-NetFirewallRule -DisplayName "Dreamine PLC FINS TCP 55000" -Direction Inbound -Protocol TCP -LocalPort 55000 -Action Allow
+```
+
+For UDP:
+
+```powershell
+New-NetFirewallRule -DisplayName "Dreamine PLC FINS UDP 55000" -Direction Inbound -Protocol UDP -LocalPort 55000 -Action Allow
+```
+
+Run PowerShell as Administrator. Without these rules, local 1PC tests may pass while 2PC tests fail.
+
+## Physical PLC test notice
+
+FINS support is currently validated with the built-in simulator. Physical Omron PLC integration must still be tested.
+
+Before connecting to a real Omron PLC, verify:
+
+- PLC model and Ethernet module support
+- FINS TCP/UDP setting
+- Port number, commonly configured as 9600 in many FINS environments
+- Source and destination node settings
+- Network number
+- Unit address
+- Memory area mapping
+- PLC Ethernet module routing settings
+- Safe polling interval
+
+FINS/TCP may require device-specific handshake or node configuration. Simulator success does not guarantee physical PLC compatibility without field testing.
+
+## Polling and write safety
+
+Do not use 1ms polling against a physical PLC.
+
+Recommended physical PLC values:
+
+- Monitoring: 100ms to 500ms
+- UI display refresh: 250ms to 1000ms
+- Write: event-driven only
+- Handshake stress test: simulator only unless explicitly approved for a real machine
+
+## Vendor runtime policy
+
+This package does not include Omron CX-Compolet, SYSMAC Gateway, or any Omron runtime DLL.
+
+This package implements FINS TCP/UDP communication directly. CX-Compolet integration, if needed, must remain in a separate adapter package without redistributing vendor DLLs.
+
+## Validation status
+
+Validated:
+
+- 1PC FINS TCP read/write and handshake
+- 1PC FINS UDP read/write and handshake
+- 2PC FINS TCP read/write and handshake
+- 2PC FINS UDP read/write and handshake
+- WPF monitor integration
+
+Pending:
+
+- Physical Omron PLC validation
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License.

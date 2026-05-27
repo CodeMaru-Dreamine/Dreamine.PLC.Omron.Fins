@@ -1,16 +1,11 @@
 using System.Net.Sockets;
-<<<<<<< HEAD
 using Dreamine.PLC.Abstractions.Results;
 using Dreamine.PLC.Omron.Fins.Options;
 using Dreamine.PLC.Omron.Fins.Protocol;
-=======
-using Dreamine.PLC.Omron.Fins.Options;
->>>>>>> main
 
 namespace Dreamine.PLC.Omron.Fins.Transport;
 
 /// <summary>
-<<<<<<< HEAD
 /// Provides TCP transport for Omron FINS communication.
 /// </summary>
 public sealed class TcpOmronFinsTransport : IOmronFinsTransport
@@ -20,31 +15,17 @@ public sealed class TcpOmronFinsTransport : IOmronFinsTransport
     private TcpClient? _tcpClient;
     private NetworkStream? _stream;
     private bool _disposed;
-=======
-/// Provides TCP transport boundary for Omron FINS communication.
-/// </summary>
-public sealed class TcpOmronFinsTransport : IOmronFinsTransport
-{
-    private readonly OmronFinsConnectionOptions _options;
-    private TcpClient? _client;
-    private NetworkStream? _stream;
->>>>>>> main
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TcpOmronFinsTransport"/> class.
     /// </summary>
-<<<<<<< HEAD
     /// <param name="options">The FINS connection options.</param>
-=======
-    /// <param name="options">The connection options.</param>
->>>>>>> main
     public TcpOmronFinsTransport(OmronFinsConnectionOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
     /// <inheritdoc />
-<<<<<<< HEAD
     public bool IsConnected => _tcpClient?.Connected == true && _stream is not null;
 
     /// <inheritdoc />
@@ -139,52 +120,11 @@ public sealed class TcpOmronFinsTransport : IOmronFinsTransport
         {
             _syncLock.Release();
         }
-=======
-    public bool IsReady => _client?.Connected == true && _stream is not null;
-
-    /// <inheritdoc />
-    public async Task OpenAsync(CancellationToken cancellationToken)
-    {
-        _client = new TcpClient();
-        using var timeout = new CancellationTokenSource(_options.TimeoutMs);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
-        await _client.ConnectAsync(_options.Host, _options.Port, linked.Token).ConfigureAwait(false);
-        _stream = _client.GetStream();
-    }
-
-    /// <inheritdoc />
-    public Task CloseAsync(CancellationToken cancellationToken)
-    {
-        _stream?.Dispose();
-        _client?.Dispose();
-        _stream = null;
-        _client = null;
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc />
-    public async Task<byte[]> SendAndReceiveAsync(byte[] request, CancellationToken cancellationToken)
-    {
-        if (_stream is null)
-        {
-            throw new InvalidOperationException("FINS TCP transport is not open.");
-        }
-
-        await _stream.WriteAsync(request, cancellationToken).ConfigureAwait(false);
-        await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-
-        var buffer = new byte[4096];
-        using var timeout = new CancellationTokenSource(_options.TimeoutMs);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
-        var length = await _stream.ReadAsync(buffer, linked.Token).ConfigureAwait(false);
-        return buffer.Take(length).ToArray();
->>>>>>> main
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-<<<<<<< HEAD
         if (_disposed)
         {
             return;
@@ -244,8 +184,5 @@ public sealed class TcpOmronFinsTransport : IOmronFinsTransport
     private void ThrowIfDisposed()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-=======
-        await CloseAsync(CancellationToken.None).ConfigureAwait(false);
->>>>>>> main
     }
 }

@@ -13,20 +13,15 @@ namespace Dreamine.PLC.Omron.Fins.Clients;
 public sealed class OmronFinsPlcClient : PlcClientBase
 {
     private readonly OmronFinsConnectionOptions _options;
-<<<<<<< HEAD
     private readonly IOmronFinsTransport _transport;
     private readonly OmronFinsFrameBuilder _frameBuilder;
     private readonly OmronFinsResponseParser _responseParser;
-=======
-    private IOmronFinsTransport? _transport;
->>>>>>> main
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OmronFinsPlcClient"/> class.
     /// </summary>
     /// <param name="options">The FINS connection options.</param>
     public OmronFinsPlcClient(OmronFinsConnectionOptions options)
-<<<<<<< HEAD
         : this(options, CreateTransport(options), new OmronFinsFrameBuilder(), new OmronFinsResponseParser())
     {
     }
@@ -65,40 +60,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
     protected override Task<PlcResult> DisconnectCoreAsync(CancellationToken cancellationToken)
     {
         return _transport.DisconnectAsync(cancellationToken);
-=======
-    {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="OmronFinsPlcClient"/> class with a custom transport.
-    /// </summary>
-    /// <param name="options">The FINS connection options.</param>
-    /// <param name="transport">The custom transport.</param>
-    public OmronFinsPlcClient(OmronFinsConnectionOptions options, IOmronFinsTransport transport)
-    {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _transport = transport ?? throw new ArgumentNullException(nameof(transport));
-    }
-
-    /// <inheritdoc />
-    protected override async Task<PlcResult> ConnectCoreAsync(CancellationToken cancellationToken)
-    {
-        _transport ??= CreateTransport(_options);
-        await _transport.OpenAsync(cancellationToken).ConfigureAwait(false);
-        return PlcResult.Success();
-    }
-
-    /// <inheritdoc />
-    protected override async Task<PlcResult> DisconnectCoreAsync(CancellationToken cancellationToken)
-    {
-        if (_transport is not null)
-        {
-            await _transport.CloseAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        return PlcResult.Success();
->>>>>>> main
     }
 
     /// <inheritdoc />
@@ -107,7 +68,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         int count,
         CancellationToken cancellationToken)
     {
-<<<<<<< HEAD
         byte[] request;
         try
         {
@@ -136,17 +96,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         }
 
         return _responseParser.ParseBits(payloadResult.Value, count);
-=======
-        if (_transport is null)
-        {
-            return PlcResult<bool[]>.Failure("FINS transport is not connected.");
-        }
-
-        var request = OmronFinsFrameBuilder.BuildMemoryAreaRead(_options, address, count, true);
-        var response = await _transport.SendAndReceiveAsync(request, cancellationToken).ConfigureAwait(false);
-        var payload = OmronFinsResponseParser.ExtractPayload(response);
-        return PlcResult<bool[]>.Success(OmronFinsResponseParser.ParseBits(payload));
->>>>>>> main
     }
 
     /// <inheritdoc />
@@ -155,7 +104,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         int count,
         CancellationToken cancellationToken)
     {
-<<<<<<< HEAD
         byte[] request;
         try
         {
@@ -184,17 +132,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         }
 
         return _responseParser.ParseWords(payloadResult.Value, count);
-=======
-        if (_transport is null)
-        {
-            return PlcResult<short[]>.Failure("FINS transport is not connected.");
-        }
-
-        var request = OmronFinsFrameBuilder.BuildMemoryAreaRead(_options, address, count, false);
-        var response = await _transport.SendAndReceiveAsync(request, cancellationToken).ConfigureAwait(false);
-        var payload = OmronFinsResponseParser.ExtractPayload(response);
-        return PlcResult<short[]>.Success(OmronFinsResponseParser.ParseWords(payload));
->>>>>>> main
     }
 
     /// <inheritdoc />
@@ -203,7 +140,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         IReadOnlyList<bool> values,
         CancellationToken cancellationToken)
     {
-<<<<<<< HEAD
         byte[] request;
         try
         {
@@ -229,17 +165,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         return payloadResult.IsSuccess
             ? PlcResult.Success()
             : PlcResult.Failure(payloadResult.Message ?? "Failed to parse FINS bit write response.", payloadResult.ErrorCode);
-=======
-        if (_transport is null)
-        {
-            return PlcResult.Failure("FINS transport is not connected.");
-        }
-
-        var request = OmronFinsFrameBuilder.BuildMemoryAreaWriteBits(_options, address, values);
-        var response = await _transport.SendAndReceiveAsync(request, cancellationToken).ConfigureAwait(false);
-        _ = OmronFinsResponseParser.ExtractPayload(response);
-        return PlcResult.Success();
->>>>>>> main
     }
 
     /// <inheritdoc />
@@ -248,7 +173,6 @@ public sealed class OmronFinsPlcClient : PlcClientBase
         IReadOnlyList<short> values,
         CancellationToken cancellationToken)
     {
-<<<<<<< HEAD
         byte[] request;
         try
         {
@@ -281,35 +205,17 @@ public sealed class OmronFinsPlcClient : PlcClientBase
     {
         await base.DisposeAsync().ConfigureAwait(false);
         await _transport.DisposeAsync().ConfigureAwait(false);
-=======
-        if (_transport is null)
-        {
-            return PlcResult.Failure("FINS transport is not connected.");
-        }
-
-        var request = OmronFinsFrameBuilder.BuildMemoryAreaWriteWords(_options, address, values);
-        var response = await _transport.SendAndReceiveAsync(request, cancellationToken).ConfigureAwait(false);
-        _ = OmronFinsResponseParser.ExtractPayload(response);
-        return PlcResult.Success();
->>>>>>> main
     }
 
     private static IOmronFinsTransport CreateTransport(OmronFinsConnectionOptions options)
     {
-<<<<<<< HEAD
         ArgumentNullException.ThrowIfNull(options);
 
-=======
->>>>>>> main
         return options.TransportType switch
         {
             OmronFinsTransportType.Tcp => new TcpOmronFinsTransport(options),
             OmronFinsTransportType.Udp => new UdpOmronFinsTransport(options),
-<<<<<<< HEAD
             _ => throw new ArgumentOutOfRangeException(nameof(options), options.TransportType, "Unsupported Omron FINS transport type.")
-=======
-            _ => throw new NotSupportedException($"Unsupported FINS transport type: {options.TransportType}.")
->>>>>>> main
         };
     }
 }
