@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
+<<<<<<< HEAD
 using Dreamine.PLC.Abstractions.Results;
+=======
+>>>>>>> main
 using Dreamine.PLC.Omron.Fins.Options;
 
 namespace Dreamine.PLC.Omron.Fins.Transport;
@@ -10,22 +13,33 @@ namespace Dreamine.PLC.Omron.Fins.Transport;
 /// </summary>
 public sealed class UdpOmronFinsTransport : IOmronFinsTransport
 {
+<<<<<<< HEAD
     private readonly SemaphoreSlim _syncLock = new(1, 1);
     private readonly OmronFinsConnectionOptions _options;
     private UdpClient? _udpClient;
     private IPEndPoint? _remoteEndPoint;
     private bool _disposed;
+=======
+    private readonly OmronFinsConnectionOptions _options;
+    private UdpClient? _client;
+    private IPEndPoint? _endpoint;
+>>>>>>> main
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UdpOmronFinsTransport"/> class.
     /// </summary>
+<<<<<<< HEAD
     /// <param name="options">The FINS connection options.</param>
+=======
+    /// <param name="options">The connection options.</param>
+>>>>>>> main
     public UdpOmronFinsTransport(OmronFinsConnectionOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
     /// <inheritdoc />
+<<<<<<< HEAD
     public bool IsConnected => _udpClient is not null && _remoteEndPoint is not null;
 
     /// <inheritdoc />
@@ -136,11 +150,62 @@ public sealed class UdpOmronFinsTransport : IOmronFinsTransport
         {
             _syncLock.Release();
         }
+=======
+    public bool IsReady => _client is not null && _endpoint is not null;
+
+    /// <inheritdoc />
+    public Task OpenAsync(CancellationToken cancellationToken)
+    {
+        _endpoint = new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port);
+        _client = new UdpClient();
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task CloseAsync(CancellationToken cancellationToken)
+    {
+        _client?.Dispose();
+        _client = null;
+        _endpoint = null;
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public async Task<byte[]> SendAndReceiveAsync(byte[] request, CancellationToken cancellationToken)
+    {
+        if (_client is null || _endpoint is null)
+        {
+            throw new InvalidOperationException("FINS UDP transport is not open.");
+        }
+
+        Exception? lastException = null;
+        var retryCount = Math.Max(1, _options.RetryCount);
+
+        for (var attempt = 0; attempt < retryCount; attempt++)
+        {
+            try
+            {
+                await _client.SendAsync(request, request.Length, _endpoint).ConfigureAwait(false);
+
+                using var timeout = new CancellationTokenSource(_options.TimeoutMs);
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
+                var result = await _client.ReceiveAsync(linked.Token).ConfigureAwait(false);
+                return result.Buffer;
+            }
+            catch (Exception ex) when (ex is OperationCanceledException or SocketException)
+            {
+                lastException = ex;
+            }
+        }
+
+        throw new TimeoutException("FINS UDP request timed out.", lastException);
+>>>>>>> main
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
+<<<<<<< HEAD
         if (_disposed)
         {
             return;
@@ -162,5 +227,8 @@ public sealed class UdpOmronFinsTransport : IOmronFinsTransport
     private void ThrowIfDisposed()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+=======
+        await CloseAsync(CancellationToken.None).ConfigureAwait(false);
+>>>>>>> main
     }
 }
