@@ -1,5 +1,7 @@
 # Dreamine.PLC.Omron.Fins
 
+[Korean documentation](./README_KO.md)
+
 Omron FINS TCP/UDP PLC adapter for the Dreamine PLC package family.
 
 This package provides FINS TCP/UDP client support and built-in FINS simulator servers for local and PC-to-PC validation.

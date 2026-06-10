@@ -1,5 +1,7 @@
 # Dreamine.PLC.Omron.Fins
 
+[English documentation](./README.md)
+
 Dreamine PLC 패키지군을 위한 Omron FINS TCP/UDP PLC 어댑터입니다.
 
 이 패키지는 FINS TCP/UDP Client와 로컬 및 PC-to-PC 검증을 위한 내장 FINS Simulator Server를 제공합니다.
