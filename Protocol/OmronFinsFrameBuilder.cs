@@ -9,7 +9,7 @@ namespace Dreamine.PLC.Omron.Fins.Protocol;
 /// </summary>
 public sealed class OmronFinsFrameBuilder
 {
-    private byte _sid;
+    private int _sid;
 
     /// <summary>
     /// Builds a FINS memory area read frame.
@@ -80,7 +80,7 @@ public sealed class OmronFinsFrameBuilder
         frame[6] = options.SourceNetwork;
         frame[7] = options.SourceNode;
         frame[8] = options.SourceUnit;
-        frame[9] = unchecked(++_sid);
+        frame[9] = unchecked((byte)Interlocked.Increment(ref _sid));
         Buffer.BlockCopy(command, 0, frame, 10, command.Length);
         return frame;
     }
@@ -97,6 +97,22 @@ public sealed class OmronFinsFrameBuilder
             throw new ArgumentOutOfRangeException(nameof(count), count, "The FINS point count must be greater than zero.");
         }
 
+        if (address.Offset is < 0 or > ushort.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(address),
+                address.Offset,
+                "The FINS address offset must be between 0 and 65535.");
+        }
+
+        if (count > ushort.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(count),
+                count,
+                "The FINS point count must be between 1 and 65535.");
+        }
+
         var areaCode = OmronFinsMemoryAreaMapper.Map(address, bitAccess);
         var bodyLength = 8 + (payload?.Length ?? 0);
         var body = new byte[bodyLength];
@@ -104,9 +120,9 @@ public sealed class OmronFinsFrameBuilder
 
         OmronFinsEndian.WriteUInt16(body, 0, commandValue);
         body[2] = areaCode;
-        OmronFinsEndian.WriteUInt16(body, 3, checked((ushort)address.Offset));
+        OmronFinsEndian.WriteUInt16(body, 3, (ushort)address.Offset);
         body[5] = (byte)(address.BitOffset ?? 0);
-        OmronFinsEndian.WriteUInt16(body, 6, checked((ushort)count));
+        OmronFinsEndian.WriteUInt16(body, 6, (ushort)count);
 
         if (payload is not null)
         {

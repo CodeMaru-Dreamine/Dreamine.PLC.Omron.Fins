@@ -87,14 +87,16 @@ public sealed class OmronFinsTcpSimulatorServer : IAsyncDisposable
         _listener?.Stop();
         _listener = null;
 
+        TcpClient[] clients;
         lock (_syncRoot)
         {
-            foreach (var client in _clients)
-            {
-                client.Dispose();
-            }
-
+            clients = _clients.ToArray();
             _clients.Clear();
+        }
+
+        foreach (var client in clients)
+        {
+            client.Dispose();
         }
 
         if (_acceptTask is not null)
@@ -141,7 +143,25 @@ public sealed class OmronFinsTcpSimulatorServer : IAsyncDisposable
     {
         while (!cancellationToken.IsCancellationRequested && _listener is not null)
         {
-            var client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
+            TcpClient client;
+
+            try
+            {
+                client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (ObjectDisposedException)
+            {
+                break;
+            }
+            catch (SocketException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
             lock (_syncRoot)
             {
                 _clients.Add(client);
