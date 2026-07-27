@@ -249,7 +249,8 @@ public sealed class OmronFinsTcpSimulatorServer : IAsyncDisposable
             return;
         }
 
-        _cts?.Cancel();
+        if (_cts is not null)
+            await _cts.CancelAsync().ConfigureAwait(false);
         _listener?.Stop();
         _listener = null;
 

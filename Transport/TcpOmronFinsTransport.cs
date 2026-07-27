@@ -546,11 +546,11 @@ public sealed class TcpOmronFinsTransport : IOmronFinsTransport
     /// </returns>
     private async Task CloseCoreAsync()
     {
-        _stream?.Dispose();
+        if (_stream is not null)
+            await _stream.DisposeAsync().ConfigureAwait(false);
         _tcpClient?.Dispose();
         _stream = null;
         _tcpClient = null;
-        await Task.CompletedTask.ConfigureAwait(false);
     }
 
     /// <summary>
