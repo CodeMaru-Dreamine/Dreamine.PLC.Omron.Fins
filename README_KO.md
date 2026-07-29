@@ -1,5 +1,20 @@
 # Dreamine.PLC.Omron.Fins
 
+[![CI](https://github.com/CodeMaru-Dreamine/Dreamine.PLC.Omron.Fins/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/CodeMaru-Dreamine/Dreamine.PLC.Omron.Fins/actions/workflows/ci.yml)
+[![품질 게이트](https://sonarcloud.io/api/project_badges/measure?project=CodeMaru-Dreamine_Dreamine.PLC.Omron.Fins&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=CodeMaru-Dreamine_Dreamine.PLC.Omron.Fins)
+[![보안 등급](https://sonarcloud.io/api/project_badges/measure?project=CodeMaru-Dreamine_Dreamine.PLC.Omron.Fins&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=CodeMaru-Dreamine_Dreamine.PLC.Omron.Fins)
+[![테스트 커버리지](https://sonarcloud.io/api/project_badges/measure?project=CodeMaru-Dreamine_Dreamine.PLC.Omron.Fins&metric=coverage)](https://sonarcloud.io/summary/new_code?id=CodeMaru-Dreamine_Dreamine.PLC.Omron.Fins)
+
+[![라이선스](https://img.shields.io/badge/license-MIT-2496ED.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8-512BD4.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![NuGet](https://img.shields.io/nuget/v/Dreamine.PLC.Omron.Fins.svg)](https://www.nuget.org/packages/Dreamine.PLC.Omron.Fins)
+[![다운로드](https://img.shields.io/nuget/dt/Dreamine.PLC.Omron.Fins.svg)](https://www.nuget.org/packages/Dreamine.PLC.Omron.Fins)
+
+[![API 문서](https://img.shields.io/badge/%F0%9F%93%98%20API%20%EB%AC%B8%EC%84%9C-dreamine.kr-2496ED)](https://dreamine.kr/libraries?lang=ko)
+[![가이드](https://img.shields.io/badge/%F0%9F%93%98%20%EA%B0%80%EC%9D%B4%EB%93%9C-dreamine.kr-2496ED)](https://dreamine.kr/guide?lang=ko)
+[![플레이그라운드](https://img.shields.io/badge/%F0%9F%8E%AE%20%ED%94%8C%EB%A0%88%EC%9D%B4%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C-dreamine.kr-7B2CBF)](https://dreamine.kr/playground?lang=ko)
+[![책](https://img.shields.io/badge/%F0%9F%93%96%20%EC%B1%85-%EC%8B%A4%EC%A0%84%20MVVM%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-black)](https://bookk.co.kr/bookStore/69c0f1b41461ec1ae849a0f6)
+
 [English documentation](./README.md)
 
 Dreamine PLC 패키지군을 위한 Omron FINS TCP/UDP PLC 어댑터입니다.
