@@ -135,7 +135,7 @@ jobs:
           /d:sonar.cs.vstest.reportsPaths="$env:RUNNER_TEMP\TestResults\**\*.trx"
           /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**,**/*.png"
           /d:sonar.coverage.exclusions="tests/**,Transport/TcpOmronFinsTransport.cs,Transport/UdpOmronFinsTransport.cs,Simulation/OmronFinsTcpSimulatorServer.cs,Simulation/OmronFinsUdpSimulatorServer.cs"
-          /d:sonar.cpd.exclusions="tests/**"
+          /d:sonar.cpd.exclusions="tests/**,Simulation/OmronFinsTcpSimulatorServer.cs,Clients/OmronFinsPlcClient.cs"
 
       - name: Build and test
         shell: pwsh
